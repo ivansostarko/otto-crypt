@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ivansostarko/otto-crypt-js:dev
+    container_name: otto-crypt-js
+    working_dir: /work
+    environment:
+      NODE_ENV: production
+    volumes:
+      # Mount your Node package (this repo)
+      - ./:/package:rw
+      # Mount a host folder with your test files
+      - ${DATA_PATH:-../data}:/data:rw
+    command: bash -lc "tail -f /dev/null"
+    # You can exec into this container and run commands:
+    # docker compose exec app bash
+
+  setup:
+    image: ivansostarko/otto-crypt-js:dev
+    working_dir: /package
+    volumes:
+      - ./:/package:rw
+    entrypoint: ["bash","-lc"]
+    command: |
+      if [ -f package-lock.json ]; then
+        npm ci
+      else
+        npm install
+      fi

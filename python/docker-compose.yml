@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ivansostarko/otto-crypt-py:dev
+    container_name: otto-crypt-py
+    working_dir: /work
+    volumes:
+      # Mount the package repo into the container
+      - ./:/package:rw
+      # Optional: a host folder with your test files
+      - ${DATA_PATH:-../data}:/data:rw
+    command: bash -lc "tail -f /dev/null"
+
+  setup:
+    image: ivansostarko/otto-crypt-py:dev
+    working_dir: /work
+    volumes:
+      - ./:/package:rw
+    entrypoint: ["bash","-lc"]
+    command: |
+      python -m pip install --upgrade pip
+      pip install -e /package

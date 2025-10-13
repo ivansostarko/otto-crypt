@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OTTO Crypt — Node.js Demo</title>
+  <link rel="stylesheet" href="/style.css">
+  <script>
+    function onModeChange(scope){
+      const which = document.querySelector(`#${scope} input[name="mode"]:checked`)?.value || 'password';
+      ['password','x25519','raw'].forEach(m=>{
+        document.querySelectorAll(`#${scope} .mode-`+m).forEach(el=>{
+          el.style.display = (m===which)? 'block':'none';
+        });
+      });
+    }
+    function init(){
+      ['textenc','textdec','fileenc','filedec'].forEach(onModeChange);
+    }
+    async function genKeys(){
+      const r = await fetch('/keys');
+      const data = await r.json();
+      const el = document.getElementById('keysOut');
+      el.textContent = JSON.stringify(data,null,2);
+    }
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>OTTO Crypt — Node.js Demo</h1>
+    <p class="muted">Encrypt/decrypt text & files (photos, docs, audio, video). Compatible with the Laravel package.</p>
+
+    <% if (textError) { %>
+    <div class="alert error"><%= textError %></div>
+    <% } %>
+
+    <% if (textResult) { %>
+    <div class="card">
+      <% if (textResult.action === 'encrypt') { %>
+        <h3>Text Encrypted</h3>
+        <label>Ciphertext+Tag (base64)</label>
+        <pre><%= textResult.cipher_b64 %></pre>
+        <label>Header (base64)</label>
+        <pre><%= textResult.header_b64 %></pre>
+      <% } else { %>
+        <h3>Text Decrypted</h3>
+        <pre><%= textResult.plaintext %></pre>
+      <% } %>
+    </div>
+    <% } %>
+
+    <div class="row">
+      <div class="col card">
+        <h2>Text — Encrypt</h2>
+        <form id="textenc" method="POST" action="/text/encrypt">
+          <label>Plaintext</label>
+          <textarea name="plaintext" rows="5" placeholder="Type something..." required></textarea>
+
+          <div class="radio-row">
+            <label><input type="radio" name="mode" value="password" checked onchange="onModeChange('textenc')"> Password</label>
+            <label><input type="radio" name="mode" value="x25519" onchange="onModeChange('textenc')"> X25519</label>
+            <label><input type="radio" name="mode" value="raw" onchange="onModeChange('textenc')"> Raw key</label>
+          </div>
+
+          <div class="mode-password">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Strong password">
+          </div>
+          <div class="mode-x25519" style="display:none">
+            <label>Recipient public key (base64 or hex)</label>
+            <input type="text" name="recipient_public" placeholder="Recipient X25519 public key">
+          </div>
+          <div class="mode-raw" style="display:none">
+            <label>Raw 32-byte key (base64/hex/raw)</label>
+            <input type="text" name="raw_key" placeholder="32-byte key">
+          </div>
+
+          <button class="btn" type="submit">Encrypt</button>
+        </form>
+      </div>
+
+      <div class="col card">
+        <h2>Text — Decrypt</h2>
+        <form id="textdec" method="POST" action="/text/decrypt">
+          <label>Ciphertext+Tag (base64)</label>
+          <textarea name="cipher_b64" rows="4" placeholder="Paste base64" required></textarea>
+          <label>Header (base64)</label>
+          <textarea name="header_b64" rows="4" placeholder="Paste base64" required></textarea>
+
+          <div class="radio-row">
+            <label><input type="radio" name="mode" value="password" checked onchange="onModeChange('textdec')"> Password</label>
+            <label><input type="radio" name="mode" value="x25519" onchange="onModeChange('textdec')"> X25519</label>
+            <label><input type="radio" name="mode" value="raw" onchange="onModeChange('textdec')"> Raw key</label>
+          </div>
+
+          <div class="mode-password">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Password used for encryption">
+          </div>
+          <div class="mode-x25519" style="display:none">
+            <label>Sender secret key (base64 or hex)</label>
+            <input type="text" name="sender_secret" placeholder="Your X25519 secret key">
+          </div>
+          <div class="mode-raw" style="display:none">
+            <label>Raw 32-byte key (base64/hex/raw)</label>
+            <input type="text" name="raw_key" placeholder="32-byte key">
+          </div>
+
+          <button class="btn" type="submit">Decrypt</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Files — Photos / Documents / Audio / Video</h2>
+      <div class="row">
+        <div class="col">
+          <form id="fileenc" method="POST" action="/file/encrypt" enctype="multipart/form-data">
+            <label>Select a file</label>
+            <input type="file" name="file" required>
+
+            <div class="radio-row">
+              <label><input type="radio" name="mode" value="password" checked onchange="onModeChange('fileenc')"> Password</label>
+              <label><input type="radio" name="mode" value="x25519" onchange="onModeChange('fileenc')"> X25519</label>
+              <label><input type="radio" name="mode" value="raw" onchange="onModeChange('fileenc')"> Raw key</label>
+            </div>
+
+            <div class="mode-password">
+              <label>Password</label>
+              <input type="password" name="password" placeholder="Strong password">
+            </div>
+            <div class="mode-x25519" style="display:none">
+              <label>Recipient public key (base64 or hex)</label>
+              <input type="text" name="recipient_public" placeholder="Recipient X25519 public key">
+            </div>
+            <div class="mode-raw" style="display:none">
+              <label>Raw 32-byte key (base64/hex/raw)</label>
+              <input type="text" name="raw_key" placeholder="32-byte key">
+            </div>
+
+            <button class="btn" type="submit">Encrypt & Download .otto</button>
+          </form>
+        </div>
+
+        <div class="col">
+          <form id="filedec" method="POST" action="/file/decrypt" enctype="multipart/form-data">
+            <label>Select .otto file</label>
+            <input type="file" name="encfile" accept=".otto,application/octet-stream" required>
+
+            <div class="radio-row">
+              <label><input type="radio" name="mode" value="password" checked onchange="onModeChange('filedec')"> Password</label>
+              <label><input type="radio" name="mode" value="x25519" onchange="onModeChange('filedec')"> X25519</label>
+              <label><input type="radio" name="mode" value="raw" onchange="onModeChange('filedec')"> Raw key</label>
+            </div>
+
+            <div class="mode-password">
+              <label>Password</label>
+              <input type="password" name="password" placeholder="Password used for encryption">
+            </div>
+            <div class="mode-x25519" style="display:none">
+              <label>Sender secret key (base64 or hex)</label>
+              <input type="text" name="sender_secret" placeholder="Your X25519 secret key">
+            </div>
+            <div class="mode-raw" style="display:none">
+              <label>Raw 32-byte key (base64/hex/raw)</label>
+              <input type="text" name="raw_key" placeholder="32-byte key">
+            </div>
+
+            <button class="btn" type="submit">Decrypt & Download</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>X25519 Keys</h2>
+      <p class="muted">Generate a new keypair for end-to-end sessions.</p>
+      <button class="btn" onclick="genKeys()">Generate</button>
+      <pre id="keysOut" class="mt"></pre>
+    </div>
+
+    <p class="muted">This is a demo. Review the package README for format and security notes.</p>
+  </div>
+</body>
+</html>

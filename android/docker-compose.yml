@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ivansostarko/otto-crypt-java-android:dev
+    container_name: otto-crypt-java-android
+    working_dir: /src
+    volumes:
+      - ./:/src:rw
+      - ${ARTIFACTS_PATH:-./artifacts}:/artifacts:rw
+    environment:
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+      - GRADLE_USER_HOME=/home/gradle/.gradle
+    command: bash -lc "tail -f /dev/null"
+
+  java-build:
+    image: ivansostarko/otto-crypt-java-android:dev
+    working_dir: /src
+    volumes:
+      - ./:/src:rw
+      - ${ARTIFACTS_PATH:-./artifacts}:/artifacts:rw
+    entrypoint: ["bash","-lc"]
+    command: |
+      set -euo pipefail
+      echo "Java build..."
+      gradle :otto-crypt-java:clean :otto-crypt-java:build
+      mkdir -p /artifacts/java
+      cp -r otto-crypt-java/build/libs/* /artifacts/java/
+
+  android-build:
+    image: ivansostarko/otto-crypt-java-android:dev
+    working_dir: /src
+    volumes:
+      - ./:/src:rw
+      - ${ARTIFACTS_PATH:-./artifacts}:/artifacts:rw
+    entrypoint: ["bash","-lc"]
+    command: |
+      set -euo pipefail
+      echo "Android build (AAR)..." 
+      gradle :otto-crypt-android:clean :otto-crypt-android:assembleRelease
+      mkdir -p /artifacts/android
+      find otto-crypt-android -name "*.aar" -maxdepth 3 -print -exec cp {} /artifacts/android/ \;
+
+  all:
+    image: ivansostarko/otto-crypt-java-android:dev
+    working_dir: /src
+    volumes:
+      - ./:/src:rw
+      - ${ARTIFACTS_PATH:-./artifacts}:/artifacts:rw
+    entrypoint: ["bash","-lc"]
+    command: |
+      set -euo pipefail
+      gradle --version
+      sdkmanager --version || true
+      gradle :otto-crypt-java:build :otto-crypt-android:assembleRelease
+      mkdir -p /artifacts/java /artifacts/android
+      cp -r otto-crypt-java/build/libs/* /artifacts/java/ || true
+      find otto-crypt-android -name "*.aar" -maxdepth 3 -print -exec cp {} /artifacts/android/ \;
