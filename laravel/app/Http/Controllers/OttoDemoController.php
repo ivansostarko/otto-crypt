@@ -68,9 +68,9 @@ class OttoDemoController extends Controller
         $origName = $file->getClientOriginalName();
         $tmpDir = 'otto-demo/' . Str::uuid()->toString();
         $inPath = $file->storeAs($tmpDir, $origName);
-        $absIn = storage_path('app/' . $inPath);
+        $absIn = storage_path('app/private/' . $inPath);
         $outName = $origName . '.otto';
-        $outPath = storage_path('app/' . $tmpDir . '/' . $outName);
+        $outPath = storage_path('app/private/' . $tmpDir . '/' . $outName);
 
         $options = $this->extractOptions($request, mode: 'encrypt');
 
@@ -93,9 +93,9 @@ class OttoDemoController extends Controller
         $origName = $file->getClientOriginalName();
         $tmpDir = 'otto-demo/' . Str::uuid()->toString();
         $inPath = $file->storeAs($tmpDir, $origName);
-        $absIn = storage_path('app/' . $inPath);
+        $absIn = storage_path('app/private/' . $inPath);
         $outName = preg_replace('/\.otto$/', '.dec', $origName) ?: ($origName . '.dec');
-        $outPath = storage_path('app/' . $tmpDir . '/' . $outName);
+        $outPath = storage_path('app/private/' . $tmpDir . '/' . $outName);
 
         $options = $this->extractOptions($request, mode: 'decrypt');
 

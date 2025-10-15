@@ -1,19 +1,37 @@
-version: "3.8"
+version: '3.8'
+ 
 services:
-  app:
+  laravel-php:
+    container_name: laravel-php
+    hostname: laravel-php
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: otto-crypt-php
-    working_dir: /var/www/html
-    environment:
-      COMPOSER_ALLOW_SUPERUSER: "1"
-    volumes:
-      # Path to your Laravel application on the host (change if needed)
-      - ./:/var/www/html
-      # Mount this package repo inside the container at /package
-      - ./:/package:rw
+      context: ./
+    restart: always
     ports:
-      - "8000:8000"
-    command: bash -lc "tail -f /var/log/lastlog || tail -f /dev/null"
+      - '2001:80' 
+      - '9045:9045'
+    volumes: 
+      - ./:/var/www/html
+      - ./conf.ini:/usr/local/etc/php/conf.d/conf.ini
+    networks:
+      - laravel   
+    stdin_open: true
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    tty: true      
+   
+
+##################################################################################  
+
+
+
+
+#################################################################################
+#  NETWORKS
+#################################################################################
+networks:    
+  laravel:
+    driver: bridge
+##################################################################################  
+
 
