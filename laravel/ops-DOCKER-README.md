@@ -1,58 +1,62 @@
-# Docker usage for OTTO Crypt JS (Node.js)
+# Docker usage for OTTO Crypt (Laravel package)
 
-This Docker setup lets you run the **otto-crypt-js** CLI and Node APIs without installing Node on your host.
+This Docker setup gives you a ready PHP 8.3 + Composer environment with the required extensions (**openssl**, **sodium**, **zip**) to develop and run OTTO Crypt inside a Laravel app.
 
-## Prereqs
-- Docker + Docker Compose v2
+## Quick start
 
-## Build
+1) Build the image and start the background container:
+
 ```bash
 docker compose up -d --build
 ```
 
-## Install package deps (inside container)
+2) Create (or use) a Laravel app on your host. By default, compose mounts `../laravel-app` into `/var/www/html` inside the container.
+
+If you need to create it:
+
 ```bash
-docker compose run --rm setup
-```
-> This runs `npm ci` (or `npm install`) in `/package`, which is your repo mounted into the container.
-
-## Folder mounts
-- `/package` → your current repo (where this Dockerfile lives).
-- `/data` → host folder for test files (set `DATA_PATH=...` or defaults to `../data`).
-
-## Run CLI (examples)
-
-**Encrypt with password:**
-```bash
-docker compose run --rm app node /package/bin/otto-crypt.js encrypt /data/in.mp4 /data/in.mp4.otto --password="P@ssw0rd!"
+mkdir -p ../laravel-app
+docker compose run --rm app bash -lc "composer create-project laravel/laravel ."
 ```
 
-**Decrypt with password:**
+3) Wire the local package into that app (path repo + require):
+
 ```bash
-docker compose run --rm app node /package/bin/otto-crypt.js decrypt /data/in.mp4.otto /data/in.dec.mp4 --password="P@ssw0rd!"
+docker compose run --rm install
 ```
 
-**E2E encrypt to X25519 public key (base64 or hex):**
+This will configure Composer to use `/package` (mounted from this repo) and run:
+`composer require ivansostarko/otto-crypt-php:*@dev`
+
+4) Use the Artisan commands (streaming encryption/decryption):
+
 ```bash
-docker compose run --rm app node /package/bin/otto-crypt.js encrypt /data/photo.jpg /data/photo.jpg.otto --recipient="BASE64_OR_HEX_PUBLIC"
+# Encrypt with password
+docker compose run --rm app php artisan otto:encrypt storage/app/in.mp4 --out=storage/app/in.mp4.otto --password="strong-pass"
+
+# Decrypt
+docker compose run --rm app php artisan otto:decrypt storage/app/in.mp4.otto --out=storage/app/in.dec.mp4 --password="strong-pass"
+
+# E2E: encrypt to recipient public key (base64 or hex)
+docker compose run --rm app php artisan otto:encrypt storage/app/big.mov --out=storage/app/big.mov.otto --recipient="BASE64_OR_HEX_PUBLIC"
+
+# E2E: decrypt with your X25519 secret key
+docker compose run --rm app php artisan otto:decrypt storage/app/big.mov.otto --out=storage/app/big.mov --sender-secret="BASE64_OR_HEX_SECRET"
 ```
 
-**E2E decrypt with X25519 secret key:**
+5) (Optional) Serve the Laravel app for local testing:
+
 ```bash
-docker compose run --rm app node /package/bin/otto-crypt.js decrypt /data/photo.jpg.otto /data/photo.jpg --sender-secret="BASE64_OR_HEX_SECRET"
+docker compose exec app bash -lc "php artisan serve --host=0.0.0.0 --port=8000"
+# Open http://localhost:8000
 ```
 
-## Use programmatic API quickly
-Open a shell in the container:
-```bash
-docker compose exec app bash
-```
-Then within `/package`, run a Node REPL or a small script that imports:
-```bash
-node -e "const {OttoCrypt}=require('./src'); (async()=>{const o=new OttoCrypt(); const r=await o.encryptString(Buffer.from('hi'),{password:'x'}); console.log(r.header.length, r.cipher.length)})()"
-```
+## Environment variable
+
+- `LARAVEL_APP_PATH` — host path to your Laravel app (default: `../laravel-app`).
 
 ## Notes
-- We use `node:22-bookworm-slim` and `tini` for a clean PID 1.
-- No native system libs required; `libsodium-wrappers` ships its own WASM.
-- If you prefer global install of the CLI, you can run `npm i -g /package` inside the container and then call `otto-crypt` directly.
+
+- The container keeps running to make it easy to `exec` commands.
+- The required PHP extensions are installed: `sodium`, `zip`, `openssl` (built-in).
+- The package is mounted at `/package` and symlinked via Composer’s path repository, so changes reflect immediately in the app.

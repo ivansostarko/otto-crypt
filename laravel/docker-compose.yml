@@ -4,29 +4,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ivansostarko/otto-crypt-js:dev
-    container_name: otto-crypt-js
-    working_dir: /work
+    container_name: otto-crypt-php
+    working_dir: /var/www/html
     environment:
-      NODE_ENV: production
+      COMPOSER_ALLOW_SUPERUSER: "1"
     volumes:
-      # Mount your Node package (this repo)
+      # Path to your Laravel application on the host (change if needed)
+      - ${LARAVEL_APP_PATH:-../laravel-app}:/var/www/html
+      # Mount this package repo inside the container at /package
       - ./:/package:rw
-      # Mount a host folder with your test files
-      - ${DATA_PATH:-../data}:/data:rw
-    command: bash -lc "tail -f /dev/null"
-    # You can exec into this container and run commands:
-    # docker compose exec app bash
+    ports:
+      - "8000:8000"
+    command: bash -lc "tail -f /var/log/lastlog || tail -f /dev/null"
 
-  setup:
-    image: ivansostarko/otto-crypt-js:dev
-    working_dir: /package
-    volumes:
-      - ./:/package:rw
-    entrypoint: ["bash","-lc"]
-    command: |
-      if [ -f package-lock.json ]; then
-        npm ci
-      else
-        npm install
-      fi

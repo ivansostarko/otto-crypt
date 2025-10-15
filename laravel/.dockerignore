@@ -1,10 +1,8 @@
+vendor
 node_modules
-npm-debug.log*
-yarn.lock
-pnpm-lock.yaml
-.DS_Store
 .git
 .github
-.vscode
 .idea
+.vscode
+composer.lock
 *.zip
