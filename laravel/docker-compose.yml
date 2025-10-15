@@ -10,7 +10,7 @@ services:
       COMPOSER_ALLOW_SUPERUSER: "1"
     volumes:
       # Path to your Laravel application on the host (change if needed)
-      - ${LARAVEL_APP_PATH:-../laravel-app}:/var/www/html
+      - ./:/var/www/html
       # Mount this package repo inside the container at /package
       - ./:/package:rw
     ports:

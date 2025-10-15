@@ -1,4 +1,6 @@
-# syntax=docker/dockerfile:1.6
+
+
+
 FROM php:8.3-cli-bookworm
 
 # System deps
