@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OTTO P2P Demo (Android)"
+            android:textSize="22sp"
+            android:textStyle="bold"/>
+
+        <!-- Key -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Raw Key (Base64, 32 bytes):"/>
+        <EditText
+            android:id="@+id/edtKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Leave empty to auto-generate"
+            android:inputType="textNoSuggestions|textVisiblePassword"/>
+
+        <Button
+            android:id="@+id/btnGenKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Generate Key"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginVertical="12dp"/>
+
+        <!-- Text demo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Text Demo"/>
+        <EditText
+            android:id="@+id/edtPlain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter plaintext"
+            android:minLines="2"/>
+        <Button
+            android:id="@+id/btnEncryptText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Encrypt Text"/>
+        <TextView
+            android:id="@+id/txtHeaderB64"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Header (B64):"
+            android:textIsSelectable="true"/>
+        <TextView
+            android:id="@+id/txtCipherB64"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cipher (B64):"
+            android:textIsSelectable="true"/>
+        <Button
+            android:id="@+id/btnDecryptText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Decrypt (from above)"/>
+        <TextView
+            android:id="@+id/txtDecrypted"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Decrypted:"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"
+            android:layout_marginVertical="12dp"/>
+
+        <!-- File demo -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="File Demo (photo/audio/video/any)"/>
+        <Button
+            android:id="@+id/btnPickFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pick File"/>
+        <TextView
+            android:id="@+id/txtFile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No file selected"/>
+        <Button
+            android:id="@+id/btnEncryptFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Encrypt File"/>
+        <Button
+            android:id="@+id/btnDecryptFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Decrypt Last Encrypted"/>
+        <TextView
+            android:id="@+id/txtFileStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status:"/>
+
+    </LinearLayout>
+</ScrollView>
