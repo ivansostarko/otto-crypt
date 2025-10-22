@@ -1,0 +1,1 @@
+Sample file – place your images/audio/video here.

@@ -1,0 +1,13 @@
+[package]
+name = "otto-crypt-demo"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Ivan Doe"]
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+base64 = "0.22"
+otto-crypt = { path = "../otto-crypt" }
+walkdir = "2"

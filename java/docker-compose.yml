@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  demo:
+    build: .
+    image: otto-crypt-java-demo:latest
+    container_name: otto-crypt-java-demo
+    environment:
+      - OTTO_RAWKEY_B64=${OTTO_RAWKEY_B64}
+    volumes:
+      - ./samples:/data
+      - ./out:/out
+    working_dir: /out
+    entrypoint: ["java","-jar","/app/otto-demo.jar"]
+    command: ["batch","--dir","/data","--out","/out","--key-b64","${OTTO_RAWKEY_B64}"]

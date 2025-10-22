@@ -1,0 +1,3 @@
+[workspace]
+members = ["otto-crypt", "otto-crypt-demo"]
+resolver = "2"
