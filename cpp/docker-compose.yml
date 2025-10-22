@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  demo:
+    build: .
+    image: otto-crypt-cpp-demo:latest
+    container_name: otto-crypt-cpp-demo
+    environment:
+      - OTTO_RAWKEY_B64=${OTTO_RAWKEY_B64}
+    volumes:
+      - ./samples:/data
+      - ./out:/out
+    working_dir: /out
+    entrypoint: ["/usr/local/bin/otto-demo"]
+    command: ["batch", "--key-b64", "${OTTO_RAWKEY_B64}", "--dir", "/data", "--out", "/out"]
